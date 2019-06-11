@@ -1,0 +1,14 @@
+{
+  "auth": {
+    "TOKEN_REQUIRED": "token required",
+    "PASSWORD_RESET_ELAPSED": "time to change password expired",
+    "PASSWORD_CHANGE_SUCCESS": "password changed successfully",
+    "password_change_mail": {
+      "SUBJECT": "Password recovery | site.com",
+      "REPORT_TO_SUPPORT": "report this to the support team",
+      "BOTTOM_TEXT": "You have received this letter, because you passed the password recovery procedure on the site site.com. If you did not do this, ignore this email or",
+      "RESET_PASSWORD": "Reset password",
+      "FOR_CONFIRM_CLICK": "To reset your password, follow the link below."
+    }
+  }
+}

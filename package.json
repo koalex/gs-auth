@@ -1,0 +1,71 @@
+{
+  "name": "gs-auth",
+  "version": "1.0.0",
+  "description": "Auth module for gen-server.",
+  "main": "index.js",
+  "scripts": {
+    "test": "cp ./.env node_modules/gen-server/ && cross-env NODE_ENV=test mocha \"./test/*.js\" --recursive --exit",
+    "cover": "cross-env NODE_ENV=test nyc --reporter=html --reporter=lcov --reporter=text --reporter=text-summary --report-dir coverage mocha \"./test/*.js\" --recursive --exit",
+    "check-updates": "ncu",
+    "check-updates:upgrade": "ncu -u",
+    "audit": "npm audit --audit-level high",
+    "retire": "retire --outputformat json --outputpath ./coverage/retire.json",
+    "retire:low": "retire --severity low --outputformat json --outputpath ./coverage/retire.low.json",
+    "retire:medium": "retire --severity medium --outputformat json --outputpath ./coverage/retire.medium.json",
+    "retire:high": "retire --severity high --outputformat json --outputpath ./coverage/retire.high.json",
+    "retire:critical": "retire --severity critical --outputformat json --outputpath ./coverage/retire.critical.json",
+    "dev": "THIS_MODULE=$(pwd) && cp ./.env node_modules/gen-server/ && cd node_modules/gen-server && cross-env MODULES=$THIS_MODULE npm run dev"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm test",
+      "pre-push": "npm test"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/koalex/gs-auth.git"
+  },
+  "bugs": {
+    "url": "https://github.com/koalex/gs-auth/issues"
+  },
+  "keywords": [
+    "koa",
+    "gen server",
+    "auth"
+  ],
+  "contributors": [
+    {
+      "name": "Konstantin Aleksandrov",
+      "email": "alexandrovkm@gmail.com",
+      "url": "https://github.com/koalex"
+    }
+  ],
+  "license": "SEE LICENSE IN LICENSE file",
+  "homepage": "https://github.com/koalex/gs-auth#readme",
+  "engines": {
+    "node": ">=10.10.0",
+    "npm": ">=6"
+  },
+  "dependencies": {
+    "cross-env": "^5.2.0",
+    "disposable-email": "^0.2.3",
+    "disposable-email-domains": "^1.0.46",
+    "gen-server": "koalex/gen-server",
+    "gs-users": "koalex/gs-users",
+    "jsonwebtoken": "^8.5.1",
+    "koa-passport": "^4.1.3",
+    "moment": "^2.24.0",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0",
+    "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "husky": "^2.4.0",
+    "mocha": "^6.1.4",
+    "npm-check-updates": "^3.1.10",
+    "nyc": "^14.1.1",
+    "retire": "^1.6.3",
+    "supertest": "^4.0.2"
+  }
+}
