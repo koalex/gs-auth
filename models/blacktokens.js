@@ -3,7 +3,8 @@
 const mongoose = require('gen-server/lib/mongoose');
 
 const blackTokenSchema = new mongoose.Schema({
-		token: { type: String }
+		token: { type: String },
+		expires: { type: Date, required: true }
 	},
 	{ versionKey: false });
 
