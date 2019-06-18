@@ -35,7 +35,6 @@ function (login, password, done) {
                 } else {
                     done(null, false, { field: 'password', message: 'user.WRONG_PASSWORD' });
                 }
-
             });
 
             return;
