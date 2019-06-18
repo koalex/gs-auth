@@ -11,7 +11,7 @@ module.exports = async ctx => {
 	await new Promise(resolve => { setTimeout(resolve, 500) }); // Anti-Bruteforce
 
     // TODO: проверить как работает каждый disposable
-	let disposableEmail = 'string' === typeof ctx.request.body.email && (!disposable.validate(ctx.request.body.email) || disposable2.some(domain => ctx.request.body.email.includes(domain)) || wildcards.some(domain => ctx.request.body.email.includes(domain)));
+	const disposableEmail = 'string' === typeof ctx.request.body.email && (!disposable.validate(ctx.request.body.email) || disposable2.some(domain => ctx.request.body.email.includes(domain)) || wildcards.some(domain => ctx.request.body.email.includes(domain)));
 
 	if (disposableEmail) {
 		return ctx.throw(400, JSON.stringify({
@@ -20,7 +20,7 @@ module.exports = async ctx => {
         }));
 	}
 
-	let emailExist = await User.findOne({ email: String(ctx.request.body.email) }).lean().exec();
+	const emailExist = await User.findOne({ email: String(ctx.request.body.email) }).lean().exec();
 
 	if (!!emailExist) {
 		return ctx.throw(400, JSON.stringify({
