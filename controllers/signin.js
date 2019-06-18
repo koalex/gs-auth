@@ -1,46 +1,32 @@
 'use strict';
 
-const passport  = require('koa-passport');
-const genTokens = require('./generateTokens');
-
-passport.use('local', require('../strategies/local'));
+const jwtokens = require('./tokens');
 
 // TODO: при смене user.max_auth_devices на 1 инвалидировать все токены (менять token_uuid) и оставлять только 1 refresh_token
 module.exports = async ctx => {
 	await new Promise(resolve => { setTimeout(resolve, 500) }); // Anti-brutforce secure
 
-	await passport.authenticate('local', async (err, user, info, status) => {
-		if (err) return ctx.throw(err);
+	const Url = (new URL(ctx.href));
 
-		if (!user) {
-			// TODO: check
-			return ctx.throw(400, info ? (info.field && !Array.isArray(info)) ? JSON.stringify([info]) : info.message ? info.message: null : null);
-        }
+	const tokens = jwtokens.createTokens(ctx, ctx.state.user, {issuer: Url.origin, audience: Url.origin});
 
-		ctx.state.user = user;
+	if (!ctx.state.user.refresh_token) ctx.state.user.refresh_token = [];
 
-		let tokens = genTokens(user);
+	if (ctx.state.user.max_auth_devices == 1) {
+		ctx.state.user.refresh_token = [tokens.refresh_token];
+	} else {
+		ctx.state.user.refresh_token.push(tokens.refresh_token);
+	}
 
-		if (!user.refresh_token) user.refresh_token = [];
+	ctx.state.user.last_activity   = Date.now();
+	ctx.state.user.last_ip_address = ctx.request.ip;
 
-		if (user.max_auth_devices == 1) {
-			user.refresh_token = [tokens.refresh_token];
-		} else {
-			user.refresh_token.push(tokens.refresh_token);
-		}
+	await ctx.state.user.save();
 
-		user.last_activity   = Date.now();
-		user.last_ip_address = ctx.request.ip;
+	if (!ctx.userAgent.isBot) {
+		await jwtokens.setTokensCookies(ctx, tokens);
+	}
 
-		await user.save();
-
-		let origin = (new URL(ctx.href)).origin;
-
-        ctx.cookies.set('x-access-token',  tokens.access_token,  { signed: true, secure: ctx.secure, httpOnly: true, domain: origin }); // FIXME: для DEV origin
-        ctx.cookies.set('x-refresh-token', tokens.refresh_token, { signed: true, secure: ctx.secure, httpOnly: true, domain: origin }); // FIXME: для DEV origin
-
-		ctx.type = 'json';
-		ctx.body = tokens;
-
-	})(ctx);
+	ctx.type = 'json';
+	ctx.body = tokens;
 };
