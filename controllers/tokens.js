@@ -127,7 +127,7 @@ function setTokensCookies (ctx, tokens) {
 
     ctx.cookies.set('x-access-token',  tokens.access_token, {
         ...cookiesOpts,
-        expires: new Date(tokens.access_token_expires)
+        // expires: new Date(tokens.access_token_expires)
     });
     ctx.cookies.set('x-refresh-token', tokens.refresh_token, {
         ...cookiesOpts,
