@@ -45,9 +45,11 @@ async function refreshTokens (ctx) {
     const Url = (new URL(ctx.href));
     let userId, tokenUuid;
 
+    const { _id } = await User.findOne({refresh_token: {$in: [String(refreshToken)]}}).lean().exec();
+
     try {
         const payload = jwt.verify(refreshToken, config.secret, {
-            subject: String(ctx.state.user._id),
+            subject: String(_id),
             audience: [Url.origin],
             issuer: [Url.origin]
         });
@@ -101,7 +103,8 @@ async function refreshTokens (ctx) {
             * TODO: может если превышено, то еще и всех авторизованных ранее выбрасывать (менять token_uuid)
             *       или блокировать пользователя с возможностью разблокировки только через email ???
             * */
-            user.refresh_token = [tokens.refresh_token];
+            // user.refresh_token = [tokens.refresh_token];
+            user.refresh_token = user.refresh_token.splice(-user.max_auth_devices);
         }
     }
 
@@ -113,7 +116,7 @@ async function refreshTokens (ctx) {
     return tokens;
 }
 
-function setTokensCookies (ctx, tokens) {
+function setTokensCookies (ctx, tokens, sessionExpired) {
     if (!tokens) throw new Error('Tokens required.');
     const Url = (new URL(ctx.href));
 
@@ -127,11 +130,11 @@ function setTokensCookies (ctx, tokens) {
 
     ctx.cookies.set('x-access-token',  tokens.access_token, {
         ...cookiesOpts,
-        expires: new Date(tokens.refresh_token_expires)
+        expires: sessionExpired ? undefined : new Date(tokens.refresh_token_expires)
     });
     ctx.cookies.set('x-refresh-token', tokens.refresh_token, {
         ...cookiesOpts,
-        expires: new Date(tokens.refresh_token_expires)
+        expires: sessionExpired ? undefined : new Date(tokens.refresh_token_expires)
     });
 }
 

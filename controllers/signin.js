@@ -17,14 +17,13 @@ module.exports = async ctx => {
 	} else {
 		ctx.state.user.refresh_token.push(tokens.refresh_token);
 	}
-
 	ctx.state.user.last_activity   = Date.now();
 	ctx.state.user.last_ip_address = ctx.request.ip;
 
 	await ctx.state.user.save();
 
 	if (!ctx.userAgent.isBot) {
-		await jwtokens.setTokensCookies(ctx, tokens);
+		await jwtokens.setTokensCookies(ctx, tokens, !Boolean(ctx.request.body.remember));
 	}
 
 	ctx.type = 'json';

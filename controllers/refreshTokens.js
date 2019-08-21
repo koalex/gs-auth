@@ -9,6 +9,8 @@ module.exports = async ctx => {
 		await jwtokens.setTokensCookies(ctx, tokens);
 	}
 
+	if (!tokens) return;
+
 	ctx.type = 'json';
 	ctx.body = tokens;
 };
