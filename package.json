@@ -48,9 +48,9 @@
     "npm": ">=6"
   },
   "dependencies": {
-    "cross-env": "^5.2.0",
+    "cross-env": "^6.0.3",
     "disposable-email": "^0.2.3",
-    "disposable-email-domains": "^1.0.46",
+    "disposable-email-domains": "^1.0.49",
     "gen-server": "koalex/gen-server",
     "gs-users": "koalex/gs-users",
     "jsonwebtoken": "^8.5.1",
@@ -58,14 +58,14 @@
     "moment": "^2.24.0",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.3"
   },
   "devDependencies": {
-    "husky": "^2.4.1",
-    "mocha": "^6.1.4",
-    "npm-check-updates": "^3.1.11",
+    "husky": "^3.0.9",
+    "mocha": "^6.2.2",
+    "npm-check-updates": "^3.1.26",
     "nyc": "^14.1.1",
-    "retire": "^1.6.3",
+    "retire": "^2.0.3",
     "supertest": "^4.0.2"
   }
 }
