@@ -160,8 +160,16 @@ async function addTokenToBlackList (token, opts = {}, force) {
         verifyOpts.audience = opts.audience;
         verifyOpts.issuer   = opts.issuer;
     }
-
-    const expires = jwt.verify(token, config.secret, verifyOpts).exp;
+    let expires;
+    try {
+        expires = jwt.verify(token, config.secret, verifyOpts).exp;
+    } catch (err) {
+        if ('TokenExpiredError' === err.name) {
+            expires = jwt.decode(token, {complete: true}).payload.exp;
+        } else {
+            throw err;
+        }
+    }
 
     const blackToken = new BlackList({
         token: token,

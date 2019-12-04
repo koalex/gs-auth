@@ -14,9 +14,6 @@ const bodyParser     = require('gen-server/middlewares/bodyParser');
 
 const bodyParserOpts = { formLimit: '28kb', jsonLimit: '28kb', textLimit: '28kb' };
 
-router.get('/signin', ctx => ctx.body = 'SIGNIN HTML PAGE');
-router.get('/signup', ctx => ctx.body = 'SIGNUP HTML PAGE');
-router.get('/forgot-password', ctx => ctx.body = 'FORGOT PASSWORD HTML PAGE');
 router.get('/users/:userId/password-reset/:token', resetPassword.get);
 
 // router.get('/signout', passport.authenticate('jwt', {session: false}), signout.single);
