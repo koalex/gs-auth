@@ -3,7 +3,7 @@
 const config      = require('config');
 const User        = require('gs-users/models/user');
 const BlackList   = require('../models/blacktokens');
-const jwt         = require('jsonwebtoken');
+const verify      = require('../controllers/tokens').verify;
 const JwtStrategy = require('passport-jwt').Strategy;
 const isOid       = require('gen-server/utils/isObjectId');
 
@@ -26,20 +26,20 @@ module.exports = new JwtStrategy(opts, async (req, jwtPayload, done) => {
     const origin = (new URL(req.href)).origin;
 
     try {
-        jwt.verify(token, config.secret, {
+        verify(token, {
             subject: String(userId),
-            audience: [origin],
-            issuer: [origin]
+            audience: origin,
+            issuer: origin
         });
 
         const user = await User.findOne({ _id: userId, active: true });
 
-        if (user.token_uuid !== tokenUuid) {
+        if (user && user.token_uuid !== tokenUuid) {
             return done(null, false);
         }
 
         if (user && user.locked) {
-            await user.incSigninAttempts(false);  // BLOCK FOR ALL SESSIONS
+            // await user.incSigninAttempts(false);  // BLOCK FOR ALL SESSIONS TODO: подобрать кейс иначе не нужно
             return done(null, false, { message: 'user.ACCOUNT_BLOCKED' });
         }
         if (user) {

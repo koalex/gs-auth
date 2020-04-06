@@ -1,3 +1,4 @@
+require('./socket');
 const routers = require('./router');
 
 module.exports = app => {

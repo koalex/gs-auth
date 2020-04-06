@@ -48,6 +48,7 @@
     "npm": ">=6"
   },
   "dependencies": {
+    "cookies": "^0.8.0",
     "cross-env": "^6.0.3",
     "disposable-email": "^0.2.3",
     "disposable-email-domains": "^1.0.49",

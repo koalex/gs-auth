@@ -2,8 +2,8 @@
 
 const uuid      = require('uuid');
 const jwtokens  = require('./tokens');
+const Socket    = require('gen-server/lib/socket');
 
-// TODO: при signout - удалять refresh_token и в черный список accees_token
 exports.single = async ctx => {
     const access_token  = ctx.headers['x-access-token'] || ctx.query.access_token || ctx.cookies.get('x-access-token') || (ctx.request.body && ctx.request.body.access_token);
     const refresh_token = ctx.headers['x-refresh-token'] || ctx.query.refresh_token || ctx.cookies.get('x-refresh-token') || (ctx.request.body && ctx.request.body.refresh_token);
@@ -39,7 +39,6 @@ exports.single = async ctx => {
 	ctx.status = 200;
 };
 
-// TODO: при signout all - инвалидировать token-ы и удалять refresh_token-ы
 exports.all = async ctx => {
 	const Url = (new URL(ctx.href));
 
@@ -52,7 +51,7 @@ exports.all = async ctx => {
 		};
 
 		await Promise.all(rTokens.map(token => {
-			return jwtokens.addTokenToBlackList(token, verifyOpts);
+			return jwtokens.addTokenToBlackList(token, verifyOpts, true);
 		}));
 	}
 
@@ -60,6 +59,18 @@ exports.all = async ctx => {
 	ctx.state.user.token_uuid    = uuid();
 
 	await ctx.state.user.save();
+
+	Socket.io.to(String(ctx.state.user._id)).emit('signoutAll.success');
+	Socket.io.in(String(ctx.state.user._id)).clients((err, clients) => {
+		if (err) {
+			// TODO: log
+		} else {
+			clients.forEach(socketId => {
+				// delete io.sockets.connected[socketId].client.user;
+				delete Socket.io.sockets.sockets[socketId].client.user;
+			});
+		}
+	});
 
 	if (!ctx.userAgent.isBot) {
 		await jwtokens.clearTokensCookies(ctx);

@@ -1,7 +1,6 @@
 const passport  = require('koa-passport');
-
 passport.use('local', require('../strategies/local'));
-passport.use('jwt',   require('../strategies/jwt'));
+passport.use('jwt', require('../strategies/jwt'));
 
 module.exports = {
     initialize: function () {
@@ -9,7 +8,7 @@ module.exports = {
     },
     authenticate: (strategy, opts) => {
         return async (ctx, next) => {
-            await passport.authenticate(strategy, opts, async (err, user, info) => {
+            await passport.authenticate(strategy, {session: false, ...opts}, async (err, user, info) => {
                 if (err) return ctx.throw(err);
 
                 if (!user) {

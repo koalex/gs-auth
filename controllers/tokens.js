@@ -1,15 +1,44 @@
 const config    = require('gen-server/lib/config');
 const jwt       = require('jsonwebtoken');
+const Cookies   = require('cookies');
 const User      = require('gs-users/models/user');
 const BlackList = require('../models/blacktokens');
 const isOid     = require('gen-server/utils/isObjectId');
 
+exports.jwtFromSocket            = jwtFromSocket;
+exports.verify                   = verify;
 exports.createTokens             = createTokens;
 exports.refreshTokens            = refreshTokens;
 exports.setTokensCookies         = setTokensCookies;
 exports.clearTokensCookies       = clearTokensCookies;
 exports.removeExpiredBlackTokens = removeExpiredBlackTokens;
 exports.addTokenToBlackList      = addTokenToBlackList;
+
+
+function jwtFromSocket (socket) {
+    const handshakeData = socket.request; // http(s) request
+    const cookies       = new Cookies(handshakeData, {}, {keys: config.keys});
+    let token;
+    if (cookies.get('x-access-token')) {
+        token = cookies.get('x-access-token');
+    } else if (handshakeData.query && handshakeData.query.access_token) {
+        token = handshakeData.query.access_token;
+    } else if (handshakeData._query && handshakeData._query.access_token) {
+        token = handshakeData._query.access_token;
+    } else if (socket.handshake.headers['x-access-token']) {
+        token = socket.handshake.headers['x-access-token'];
+    }
+
+    return token;
+}
+
+function verify (token, opts = {}) {
+    const verifyOptions = {};
+    if (opts.subject || opts.userId) verifyOptions.subject = opts.subject || opts.userId;
+    if (opts.audience || opts.origin) verifyOptions.audience = [opts.audience || opts.origin];
+    if (opts.issuer || opts.origin) verifyOptions.issuer = [opts.issuer || opts.origin];
+    return jwt.verify(token, config.secret, verifyOptions);
+}
 
 function createTokens (ctx, user, opts = {}) {
     if (arguments.length !== 3) throw new Error('Argument mismatch.');
@@ -42,16 +71,17 @@ function createTokens (ctx, user, opts = {}) {
 
 async function refreshTokens (ctx) {
     const refreshToken = ctx.headers['x-refresh-token'] || ctx.query.access_token || ctx.cookies.get('x-refresh-token') || (ctx.request.body && ctx.request.body.refresh_token);
+    if (!refreshToken) return ctx.throw(401, 'No refresh token');
     const Url = (new URL(ctx.href));
     let userId, tokenUuid;
 
-    const { _id } = await User.findOne({refresh_token: {$in: [String(refreshToken)]}}).lean().exec();
-
     try {
-        const payload = jwt.verify(refreshToken, config.secret, {
+        const { _id } = await User.findOne({refresh_token: {$in: [String(refreshToken)]}}).lean().exec();
+
+        const payload = verify(refreshToken, {
             subject: String(_id),
-            audience: [Url.origin],
-            issuer: [Url.origin]
+            audience: Url.origin,
+            issuer: Url.origin
         });
 
         userId    = payload.sub;
@@ -61,7 +91,7 @@ async function refreshTokens (ctx) {
     } catch (err) {
 
         if ('TokenExpiredError' === err.name) {
-            await User.update( // удалить этот токен у всех пользователей т.к. он истёк (в теории он должен быть только у одного)
+            await User.updateMany( // удалить этот токен у всех пользователей т.к. он истёк (в теории он должен быть только у одного)
                 {refresh_token: {$in: [String(refreshToken)]}},
                 {$pull: {refresh_token: String(refreshToken)}},
                 {multi: true}
@@ -79,7 +109,7 @@ async function refreshTokens (ctx) {
         return ctx.throw(401);
     }
 
-    await User.update(
+    await User.updateMany(
         {refresh_token: {$in: [String(refreshToken)]}},
         {$pull: {refresh_token: String(refreshToken)}},
         {multi: true}
@@ -162,7 +192,7 @@ async function addTokenToBlackList (token, opts = {}, force) {
     }
     let expires;
     try {
-        expires = jwt.verify(token, config.secret, verifyOpts).exp;
+        expires = verify(token, verifyOpts).exp;
     } catch (err) {
         if ('TokenExpiredError' === err.name) {
             expires = jwt.decode(token, {complete: true}).payload.exp;

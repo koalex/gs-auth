@@ -34,7 +34,7 @@ exports.post = async ctx => {
 		return ctx.throw(400);
 	}
 
-	// await User.update({ _id: ctx.params.userId, active: true, password_reset_token: ctx.params.token }, { active: true, $unset: { password_reset_token: 1 }});
+	// await User.updateMany({ _id: ctx.params.userId, active: true, password_reset_token: ctx.params.token }, { active: true, $unset: { password_reset_token: 1 }});
 
 	user.password                  = String(ctx.request.body.password);
 	user.password_reset_token      = undefined;

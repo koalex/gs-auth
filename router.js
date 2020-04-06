@@ -20,7 +20,7 @@ router.get('/users/:userId/password-reset/:token', resetPassword.get);
 // router.get('/signout-all', passport.authenticate('jwt', {session: false}), signout.all);
 ApiV1.post('/signout', bodyParser(bodyParserOpts), passport.authenticate('jwt', {session: false}), signout.single);
 ApiV1.post('/signout-all', bodyParser(bodyParserOpts), passport.authenticate('jwt', {session: false}), signout.all);
-ApiV1.post('/signin', bodyParser(bodyParserOpts), passport.authenticate('local', {session: false}), signin);
+ApiV1.post('/signin', bodyParser(bodyParserOpts), passport.authenticate('local', {session: false/*, badRequestMessage: 'Custom message'*/}), signin);
 ApiV1.post('/signup', bodyParser(bodyParserOpts), signup);
 ApiV1.post('/forgot-password', bodyParser(bodyParserOpts), forgotPassword);
 ApiV1.post('/users/:userId/password-reset/:token', bodyParser(bodyParserOpts), resetPassword.post);
