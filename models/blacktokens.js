@@ -4,11 +4,7 @@ const mongoose = require('gen-server/lib/mongoose');
 
 const blackTokenSchema = new mongoose.Schema({
 		token: { type: String },
-		creation_date: {
-			type: Date,
-			default: Date.now,
-			expires: 30 // Через 30 сек. монга должна удалить документ, но по факуту время через которое докумен удалится будет больше!
-		}
+		expires: { type: Date, required: true }
 	},
 	{ versionKey: false });
 
