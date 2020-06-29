@@ -16,6 +16,7 @@ const bodyParserOpts = { formLimit: '28kb', jsonLimit: '28kb', textLimit: '28kb'
 
 router.get('/users/:userId/password-reset/:token', resetPassword.get);
 
+// Без failWithError: true passport.js не будет кидать кастомные ошибки.
 // router.get('/signout', passport.authenticate('jwt', {session: false}), signout.single);
 // router.get('/signout-all', passport.authenticate('jwt', {session: false}), signout.all);
 ApiV1.post('/signout', bodyParser(bodyParserOpts), passport.authenticate('jwt', {session: false}), signout.single);
