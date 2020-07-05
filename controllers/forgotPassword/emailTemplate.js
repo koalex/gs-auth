@@ -1,4 +1,5 @@
 const config = require('config');
+// FIXME: брать из ctx.origin
 const uri    = config.protocol + '://' + config.host + (__DEV__ ? (':' + config.port) : '');
 
 module.exports = function (params) {
