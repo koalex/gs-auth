@@ -12,12 +12,12 @@ const opts = {};
       opts.secretOrKey = config.secret;
       opts.ignoreExpiration = false;
       opts.jwtFromRequest = req => {
-          const token = req.headers['x-access-token'] || req.query.access_token || req.cookies.get('x-access-token') || (req.body && req.body.access_token);
+          const token = req.query.access_token || (req.body && req.body.access_token) || req.headers['x-access-token'] || req.cookies.get('x-access-token');
           return token;
       };
 
 module.exports = new JwtStrategy(opts, async (req, jwtPayload, done) => {
-    const token     = req.headers['x-access-token'] || req.query.access_token || req.cookies.get('x-access-token') || (req.body && req.body.access_token);
+    const token     = req.query.access_token || (req.body && req.body.access_token) || req.headers['x-access-token'] || req.cookies.get('x-access-token');
     const denied    = await BlackList.findOne({ token }).lean().exec();
     const userId    = String(jwtPayload.sub);
     const tokenUuid = String(jwtPayload.token_uuid);
