@@ -44,7 +44,7 @@ module.exports = async ctx => {
 
 	await user.save();
 
-	await mailer({ // FIXME: поменять шаблон как на авторизации
+	await mailer['no-reply'].sendMail({ // FIXME: поменять шаблон как на авторизации
 		to: ctx.request.body.email,
 		subject: ctx.i18n.__('auth.password_change_mail.SUBJECT'),
 		html: emailTemplate({
